@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST 111 CBT | Professional Portal</title>
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-blue: #0056b3;
+            --pure-white: #ffffff;
+            --soft-gray: #f4f7f9;
+            --correct-green: #28a745;
+            --wrong-red: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--soft-gray);
+            margin: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: var(--primary-blue);
+            color: var(--pure-white);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--accent-blue);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: var(--pure-white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .btn:hover { background-color: var(--accent-blue); }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .option {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #edf0f2;
+            background: #fff;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .option.selected { border-color: var(--primary-blue); background: #eef6ff; }
+        
+        .nav-controls { display: flex; justify-content: space-between; margin-top: 25px; }
+        .hidden { display: none; }
+        
+        /* Review Table Styles */
+        .review-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .correct-text { color: var(--correct-green); font-weight: bold; }
+        .wrong-text { color: var(--wrong-red); font-weight: bold; }
+
+        #timer { font-size: 22px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    GST 111: COMMUNICATION IN ENGLISH
+    <div id="timer">40:00</div>
+</header>
+
+<div class="container">
+    <div id="login-screen">
+        <h2 style="color: var(--primary-blue);">Welcome to the CBT Portal</h2>
+        <p>This exam consists of 100 questions covering the GST 111 syllabus. Good luck!</p>
+        <input type="text" id="studentName" placeholder="Enter Full Name" style="width: 100%; padding: 15px; margin: 20px 0; font-size: 18px; border: 1px solid #ccc; border-radius: 4px;">
+        <button class="btn" onclick="startTest()">Begin Examination</button>
+    </div>
+
+    <div id="test-screen" class="hidden">
+        <div style="display:flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+            <span id="qCount" style="font-weight: bold; color: var(--primary-blue);"></span>
+            <span id="displayName"></span>
+        </div>
+        <h3 id="questionText" style="line-height: 1.6;"></h3>
+        <div id="optionsBox"></div>
+        
+        <div class="nav-controls">
+            <button class="btn" id="prevBtn" onclick="prevQuestion()">Previous</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()">Next</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <h2 style="color: var(--primary-blue); text-align: center;">Examination Result</h2>
+        <div id="finalScore" style="font-size: 40px; text-align: center; margin: 20px 0; font-weight: bold;"></div>
+        
+        <hr>
+        <h3>Answer Review</h3>
+        <div id="reviewBox"></div>
+        
+        <button class="btn" style="margin-top: 20px; width: 100%;" onclick="location.reload()">Restart Test</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // SECTION 1: THE ART OF COMMUNICATION
+        { q: "The word 'communication' is derived from the Latin word ________ which means 'to make common'.", a: ["Communicatio", "Communicare", "Communis", "Communal"], c: 2 },
+        { q: "According to Gode, communication is a process that makes common to many what was once the monopoly of ________.", a: ["The public", "The source", "One or some", "The receiver"], c: 2 },
+        { q: "Which of the following is NOT an element of communication?", a: ["Source", "Destination", "Feedback", "Silence"], c: 3 },
+        { q: "Communication that takes place within an individual is called ________.", a: ["Inter-personal", "Mass communication", "Intra-personal", "Verbal communication"], c: 2 },
+        { q: "The prefix 'intra' means ________.", a: ["Between", "Outside", "Within or inside", "Across"], c: 2 },
+        { q: "Communication between two or more persons is referred to as ________.", a: ["Intra-personal", "Inter-personal", "Mass communication", "Mediated communication"], c: 1 },
+        { q: "Which mode of communication involves face-to-face exchange of information?", a: ["Written", "Oral", "Visual", "Mediated"], c: 1 },
+        { q: "A major disadvantage of oral communication is that it ________.", a: ["Is slow", "Can easily be forgotten as it is not documented", "Does not allow feedback", "Is very expensive"], c: 1 },
+        { q: "The spread of information to a large number of people at the same time through multimedia channels is ________.", a: ["Inter-personal communication", "Mass communication", "Intra-personal communication", "Group communication"], c: 1 },
+        { q: "Which of the following is a feature of mass communication?", a: ["Private audience", "Simultaneous delivery", "Slow delivery", "High cost per person reached"], c: 1 },
+
+        // SECTION 2: LANGUAGE SKILLS
+        { q: "Which skill is often considered the most basic and frequently used in communication?", a: ["Speaking", "Writing", "Listening", "Reading"], c: 2 },
+        { q: "Hearing is a physiological process, while listening is a ________ process.", a: ["Biological", "Psychological", "Chemical", "Mechanical"], c: 1 },
+        { q: "Intensive reading is also known as ________ reading.", a: ["Scanning", "Skimming", "Study", "Leisure"], c: 2 },
+        { q: "Using a dictionary to find the meaning of a word while reading is a form of ________.", a: ["Extensive reading", "Critical reading", "Intensive reading", "Skimming"], c: 2 },
+        { q: "Note-taking usually occurs ________.", a: ["After a lecture", "During a lecture or speech", "While writing an essay", "Before reading a book"], c: 1 },
+        { q: "Note-making is the process of ________.", a: ["Exact recording", "Recording a lecture", "Synthesizing information in one's own words", "Photocopying"], c: 2 },
+        { q: "Skimming a text means ________.", a: ["Looking for specific dates", "Reading every word", "Quickly running eyes to get the general gist", "Memorizing"], c: 2 },
+        { q: "Scanning is used when one wants to ________.", a: ["Understand tone", "Locate specific information", "Critique the book", "Enjoy a novel"], c: 1 },
+        { q: "Which language skill is productive and oral?", a: ["Listening", "Speaking", "Reading", "Writing"], c: 1 },
+        { q: "Which language skill is receptive and written?", a: ["Listening", "Speaking", "Reading", "Writing"], c: 2 },
+
+        // SECTION 3: LETTER WRITING
+        { q: "A letter written to a government official or business is a ________.", a: ["Personal", "Formal", "Informal", "Semi-formal"], c: 1 },
+        { q: "The tone of a formal letter should be ________.", a: ["Casual", "Emotional", "Polite and official", "Sarcastic"], c: 2 },
+        { q: "In a formal letter, if the recipient name is unknown, use ________.", a: ["Dear Friend", "Dear Sir/Ma", "Hi there", "To whom it may concern"], c: 1 },
+        { q: "Appropriate complimentary close for a formal letter?", a: ["Yours sincerely", "Yours faithfully", "Best wishes", "Your son"], c: 1 },
+        { q: "Informal letters are written to ________.", a: ["Employers", "Friends and relatives", "Business partners", "Principals"], c: 1 },
+        { q: "Semi-formal letters are written to ________.", a: ["Strangers", "Close friends", "People known but not closely", "Parents"], c: 2 },
+        { q: "Part of formal letter containing writer’s address and date?", a: ["Body", "Heading", "Superscription", "Subscription"], c: 1 },
+        { q: "The address of the recipient in a formal letter is ________.", a: ["Return address", "Inside address", "Postscript", "Salutation"], c: 1 },
+        { q: "Postscript (P.S.) is most common in which letter?", a: ["Formal", "Semi-formal", "Informal", "Minutes"], c: 2 },
+        { q: "The 'heading' of an informal letter usually includes ________.", a: ["Writer's address and date", "Receiver's address", "Subject line", "Logo"], c: 0 },
+
+        // SECTION 4: REPORT WRITING
+        { q: "A good report must be ________.", a: ["Vague", "Accurate and objective", "Full of opinions", "Long"], c: 1 },
+        { q: "Report written at regular intervals?", a: ["Investigative", "Periodic/Routine", "Progress", "Feasibility"], c: 1 },
+        { q: "Report to determine if a project should be undertaken?", a: ["Progress", "Feasibility", "Annual", "Laboratory"], c: 1 },
+        { q: "Terms of Reference in a report explains ________.", a: ["Conclusions", "Scope and purpose", "Budget", "Authors"], c: 1 },
+        { q: "Reports are usually written in ________ voice.", a: ["Active", "Passive", "Imperative", "Subjective"], c: 1 },
+        { q: "Section of report summarizing findings and suggesting action?", a: ["Introduction", "Appendices", "Recommendations", "Title page"], c: 2 },
+        { q: "Report documenting day-to-day business activities?", a: ["Formal", "Statutory", "Progress", "Periodic"], c: 3 },
+        { q: "NOT a quality of a good report?", a: ["Clarity", "Subjectivity", "Conciseness", "Completeness"], c: 1 },
+        { q: "The Appendix in a report is for ________.", a: ["Main argument", "Supplementary material", "Contents", "Summary"], c: 1 },
+        { q: "A Statutory Report is one that is ________.", a: ["Required by law", "For students", "Optional", "Personal"], c: 0 },
+
+        // SECTION 5: BOOK REVIEW AND MINUTES
+        { q: "A book review is an ________ of a book.", a: ["Exact copy", "Evaluation/Critical analysis", "Advertisement", "Outline"], c: 1 },
+        { q: "Relevant Data for a book review includes all EXCEPT ________.", a: ["Title/Author", "Publisher/Year", "Pages", "Reviewer's address"], c: 3 },
+        { q: "Minutes of a meeting serve as ________.", a: ["Secret diary", "Official record", "List of complaints", "Script"], c: 1 },
+        { q: "Who is primarily responsible for taking minutes?", a: ["Chairman", "Treasurer", "Secretary", "Auditor"], c: 2 },
+        { q: "Matters Arising in minutes refers to ________.", a: ["New business", "Updates from previous meeting", "Prayer", "Attendees"], c: 1 },
+        { q: "AOB in minutes stands for ________.", a: ["All Other Business", "Any Other Business", "Always On Board", "Action On Business"], c: 1 },
+        { q: "Minutes should be written in ________ tense.", a: ["Future", "Present", "Past", "Present Continuous"], c: 2 },
+        { q: "Adjournment of a meeting refers to its ________.", a: ["Opening", "Discussion", "Postponement/Conclusion", "Duration"], c: 2 },
+        { q: "A Quorum is ________.", a: ["The Chair", "Min number of members for validity", "Snacks", "Report type"], c: 1 },
+        { q: "Minutes are signed by ________ and ________.", a: ["Secretary/Auditor", "Chairman/Secretary", "Treasurer/Chairman", "All members"], c: 1 },
+
+        // SECTION 6: ESSAY WRITING
+        { q: "An essay that tells a story is a ________ essay.", a: ["Descriptive", "Argumentative", "Narrative", "Expository"], c: 2 },
+        { q: "Essay aiming to convince the reader?", a: ["Narrative", "Argumentative/Persuasive", "Descriptive", "Expository"], c: 1 },
+        { q: "An expository essay is designed to ________.", a: ["Tell story", "Describe person", "Explain or inform", "Debate"], c: 2 },
+        { q: "The Thesis Statement usually appears in the ________.", a: ["Conclusion", "Body", "Introduction", "Bibliography"], c: 2 },
+        { q: "Descriptive essays use ________.", a: ["Logic/Stats", "Sensory details", "Flashbacks", "Jargon"], c: 1 },
+        { q: "Furthermore, However, and Moreover help achieve ________.", a: ["Complexity", "Coherence", "Conflict", "Length"], c: 1 },
+        { q: "Conclusion of an essay should ________.", a: ["Intro new ideas", "Summarize and close", "Be longest", "Be bulleted"], c: 1 },
+        { q: "Comparison and Contrast development involves ________.", a: ["Similarities/Differences", "Sequence", "Names", "Definition"], c: 0 },
+        { q: "The Topic Sentence of a paragraph ________.", a: ["Is last", "Expresses main idea", "Is long quote", "Only narrative"], c: 1 },
+        { q: "NOT a stage in writing an essay?", a: ["Pre-writing", "Drafting", "Editing", "Plagiarizing"], c: 3 },
+
+        // SECTION 7: THE SENTENCE
+        { q: "A sentence that makes a statement is ________.", a: ["Imperative", "Declarative", "Interrogative", "Exclamatory"], c: 1 },
+        { q: "Please, close the door is ________.", a: ["Interrogative", "Imperative", "Declarative", "Exclamatory"], c: 1 },
+        { q: "A compound sentence consists of ________.", a: ["One clause", "Two+ independent clauses", "One indep/one dep", "Phrases"], c: 1 },
+        { q: "Which is a Complex Sentence?", a: ["I like rice", "Because it rained, we stayed", "He came, saw", "She sings"], c: 1 },
+        { q: "Two main parts of simple sentence: Subject and ________.", a: ["Noun", "Predicate", "Adverb", "Pronoun"], c: 1 },
+        { q: "'The boy is running.' Subject is ________.", a: ["Is", "Running", "The boy", "Boy is"], c: 2 },
+        { q: "A Sentence Fragment is ________.", a: ["Long sentence", "Incomplete sentence", "Too many commas", "Question"], c: 1 },
+        { q: "Run-on sentences occur when ________.", a: ["Too short", "Joined without proper punctuation", "No verb", "Caps"], c: 1 },
+        { q: "'Who is there?' is ________.", a: ["Exclamatory", "Imperative", "Interrogative", "Declarative"], c: 2 },
+        { q: "Which pattern is S-V-O?", a: ["Dog barked", "She ate apple", "He is doctor", "They gave gift"], c: 1 },
+
+        // SECTION 8: SOUNDS OF ENGLISH
+        { q: "How many vowel sounds in English?", a: ["5", "12", "20", "24"], c: 2 },
+        { q: "Pure vowels are also known as ________.", a: ["Diphthongs", "Monophthongs", "Triphthongs", "Consonants"], c: 1 },
+        { q: "Sound from combination of two vowels in one syllable?", a: ["Monophthong", "Diphthong", "Plosive", "Fricative"], c: 1 },
+        { q: "How many consonant sounds in English?", a: ["20", "24", "21", "26"], c: 1 },
+        { q: "Relative degree of force for a syllable?", a: ["Intonation", "Pitch", "Stress", "Rhythm"], c: 2 },
+        { q: "Rising and falling of voice in speech?", a: ["Stress", "Intonation", "Phonetics", "Morphology"], c: 1 },
+        { q: "Which is a voiced consonant?", a: ["/p/", "/t/", "/b/", "/k/"], c: 2 },
+        { q: "The /θ/ sound is in ________.", a: ["This", "Think", "There", "Then"], c: 1 },
+        { q: "Primary stress in Examination?", a: ["1st", "2nd", "3rd", "4th"], c: 3 },
+        { q: "Falling intonation is used for ________.", a: ["Yes/No", "Statements/Commands", "Lists", "Doubt"], c: 1 },
+
+        // SECTION 9: WORD FORMATION
+        { q: "Adding prefix or suffix is ________.", a: ["Clipping", "Affixation", "Blending", "Acronym"], c: 1 },
+        { q: "UNESCO is an ________.", a: ["Abbreviation", "Acronym", "Inflection", "Blend"], c: 1 },
+        { q: "Exam from Examination is ________.", a: ["Blending", "Clipping", "Derivation", "Compounding"], c: 1 },
+        { q: "Blackboard is ________.", a: ["Clipping", "Compounding", "Affixation", "Blending"], c: 1 },
+        { q: "Smog (Smoke + Fog) is ________.", a: ["Compounding", "Blending", "Clipping", "Acronym"], c: 1 },
+        { q: "A Suffix is added ________.", a: ["Beginning", "Middle", "End", "Inside"], c: 2 },
+        { q: "Inflectional morphology deals with ________.", a: ["New words", "Grammar category", "Shortening", "Mixing"], c: 1 },
+        { q: "Which is a derivative word?", a: ["Books", "Happiness", "Played", "Cats"], c: 1 },
+        { q: "Root word in Unpredictable?", a: ["Un", "Predict", "Able", "Predictable"], c: 1 },
+        { q: "Ref for Referee is ________.", a: ["Back-clipping", "Fore-clipping", "Middle", "Complex"], c: 0 },
+
+        // SECTION 10: RHETORIC AND ETHICS
+        { q: "Rhetoric is the art of ________.", a: ["Reading", "Persuasive speaking", "Secret comm", "Drawing"], c: 1 },
+        { q: "Benefit of public speaking?", a: ["Fear", "Self-confidence", "Isolation", "Politics only"], c: 1 },
+        { q: "First step in speech prep?", a: ["Conclusion", "Topic/Purpose", "Memorizing", "Suit"], c: 1 },
+        { q: "Ethics refers to ________.", a: ["Rules", "Principles of right/wrong", "Grades", "Wealth"], c: 1 },
+        { q: "Malpractice includes all EXCEPT ________.", a: ["Bullets", "Impersonation", "Studying hard", "Collusion"], c: 2 },
+        { q: "Plagiarism is ________.", a: ["Studying", "Using work without credit", "Reviewing", "Citing"], c: 1 },
+        { q: "Speaker's Style refers to ________.", a: ["Clothes", "Arrangement of words", "Time", "Audience size"], c: 1 },
+        { q: "Non-verbal communication in speaking?", a: ["Diction", "Vocabulary", "Body language", "Structure"], c: 2 },
+        { q: "Audience Analysis helps to ________.", a: ["Ignore", "Tailor message", "Speak long", "Difficult words"], c: 1 },
+        { q: "Integrity in exams means ________.", a: ["Cheating", "Honesty/Moral adherence", "Passing at all costs", "Knowing questions"], c: 1 }
+    ];
+
+    let currentIdx = 0;
+    let timeLeft = 40 * 60;
+    let timerId;
+    let userAnswers = new Array(100).fill(null);
+
+    function startTest() {
+        const name = document.getElementById('studentName').value;
+        if(!name.trim()) return alert("Enter your name to start!");
+        
+        document.getElementById('displayName').innerText = "Student: " + name;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('test-screen').classList.remove('hidden');
+        
+        renderQuestion();
+        startTimer();
+    }
+
+    function startTimer() {
+        timerId = setInterval(() => {
+            timeLeft--;
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            if(timeLeft <= 0) endTest();
+        }, 1000);
+    }
+
+    function renderQuestion() {
+        const q = questions[currentIdx];
+        document.getElementById('qCount').innerText = `Question ${currentIdx + 1} of 100`;
+        document.getElementById('questionText').innerText = q.q;
+        
+        document.getElementById('prevBtn').disabled = (currentIdx === 0);
+        document.getElementById('nextBtn').innerText = (currentIdx === 99) ? "Submit Exam" : "Next Question";
+
+        const box = document.getElementById('optionsBox');
+        box.innerHTML = "";
+        q.a.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = "option";
+            if(userAnswers[currentIdx] === i) btn.classList.add('selected');
+            btn.innerText = `${String.fromCharCode(65 + i)}. ${opt}`;
+            btn.onclick = () => {
+                userAnswers[currentIdx] = i;
+                renderQuestion(); 
+            };
+            box.appendChild(btn);
+        });
+    }
+
+    function nextQuestion() {
+        if(currentIdx < 99) {
+            currentIdx++;
+            renderQuestion();
+        } else {
+            if(confirm("Submit your examination now?")) endTest();
+        }
+    }
+
+    function prevQuestion() {
+        if(currentIdx > 0) {
+            currentIdx--;
+            renderQuestion();
+        }
+    }
+
+    function endTest() {
+        clearInterval(timerId);
+        let score = 0;
+        const reviewBox = document.getElementById('reviewBox');
+        reviewBox.innerHTML = "";
+
+        questions.forEach((q, idx) => {
+            const isCorrect = userAnswers[idx] === q.c;
+            if(isCorrect) score++;
+
+            const userText = userAnswers[idx] !== null ? q.a[userAnswers[idx]] : "No answer given";
+            const correctText = q.a[q.c];
+
+            reviewBox.innerHTML += `
+                <div class="review-item">
+                    <strong>Q${idx + 1}: ${q.q}</strong><br>
+                    <span class="${isCorrect ? 'correct-text' : 'wrong-text'}">Your Answer: ${userText}</span><br>
+                    ${!isCorrect ? `<span class="correct-text">Correct Answer: ${correctText}</span>` : ""}
+                </div>
+            `;
+        });
+
+        document.getElementById('finalScore').innerText = `Total Score: ${score} / 100`;
+        document.getElementById('test-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+    }
+</script>
+</body>
+  </html>
+          
